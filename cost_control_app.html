@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Cost Control — Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --orange:#E85A1E; --orange-l:#F47C3C;
+  --dark:#1A1A2E; --darker:#0D0D1A;
+  --blue:#1E3A6E; --blue-l:#2557A7;
+  --green:#27AE60; --red:#E74C3C; --gold:#F39C12;
+  --text:#E8E8F0; --muted:#7788AA;
+  --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--darker);color:var(--text);font-family:'Sarabun',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 15% 15%,rgba(232,90,30,.07) 0%,transparent 50%),
+             radial-gradient(ellipse at 85% 85%,rgba(30,58,110,.1) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+
+/* NAV */
+nav{background:rgba(13,13,26,.95);border-bottom:1px solid var(--border);
+    padding:0 32px;display:flex;align-items:center;justify-content:space-between;
+    height:68px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.nav-brand{display:flex;flex-direction:column;gap:1px}
+.nav-company{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;
+             color:white;text-transform:uppercase;line-height:1}
+.nav-company span{color:var(--orange)}
+.nav-logo{display:none}
+.nav-links{display:flex;gap:4px}
+.nav-link{padding:7px 16px;font-size:13px;font-family:'Space Mono',monospace;color:var(--muted);
+          border:1px solid transparent;cursor:pointer;transition:.2s;text-decoration:none;
+          letter-spacing:.5px}
+.nav-link:hover,.nav-link.active{color:white;border-color:var(--border);background:var(--card)}
+.nav-link.active{border-color:var(--orange);color:var(--orange)}
+.nav-actions{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 16px;font-size:12px;font-family:'Space Mono',monospace;cursor:pointer;
+     border:none;letter-spacing:1px;transition:.2s;font-weight:700}
+.btn-primary{background:var(--orange);color:white}
+.btn-primary:hover{background:var(--orange-l)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--orange);color:var(--orange)}
+.btn-sm{padding:5px 12px;font-size:11px}
+
+/* LAYOUT */
+.page{display:none;position:relative;z-index:1}
+.page.active{display:block}
+.container{max-width:1280px;margin:0 auto;padding:32px 24px}
+
+/* SECTION TITLE */
+.sec-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;
+           text-transform:uppercase;color:var(--orange);margin-bottom:16px;
+           display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* SUMMARY KPI ROW */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--border);padding:18px 20px;
+     position:relative;overflow:hidden;transition:.2s}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.k1::before{background:var(--orange)}
+.kpi.k2::before{background:var(--blue-l)}
+.kpi.k3::before{background:var(--green)}
+.kpi.k4::before{background:var(--gold)}
+.kpi.k5::before{background:var(--red)}
+.kpi-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;
+           color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:white;line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.kpi-badge{display:inline-block;padding:2px 7px;font-size:10px;font-weight:700;margin-top:5px}
+.badge-g{background:rgba(39,174,96,.15);color:var(--green)}
+.badge-r{background:rgba(231,76,60,.15);color:var(--red)}
+.badge-o{background:rgba(232,90,30,.15);color:var(--orange)}
+.badge-gold{background:rgba(243,156,18,.15);color:var(--gold)}
+.badge-b{background:rgba(37,87,167,.15);color:#7EC8E3}
+
+/* CHART ROW */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+.chart-card{background:var(--card);border:1px solid var(--border);padding:24px}
+.chart-wrap{position:relative;height:220px}
+
+/* PROJECT TABLE */
+.proj-table-wrap{background:var(--card);border:1px solid var(--border);overflow:hidden;margin-bottom:28px}
+.proj-table{width:100%;border-collapse:collapse;font-size:13px}
+.proj-table th{background:rgba(232,90,30,.12);color:var(--orange-l);padding:10px 14px;
+               font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;
+               text-transform:uppercase;border-bottom:2px solid var(--orange);white-space:nowrap}
+.proj-table td{padding:12px 14px;border-bottom:1px solid var(--border);
+               font-family:'Space Mono',monospace;font-size:12px;white-space:nowrap}
+.proj-table tr:last-child td{border-bottom:none}
+.proj-table tr:hover td{background:rgba(255,255,255,.03)}
+.proj-table td.name-cell{font-family:'Sarabun',sans-serif;font-weight:600;font-size:13px;
+                          max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-table td.num{text-align:right}
+.status-chip{display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.link-btn{color:var(--orange-l);cursor:pointer;text-decoration:underline;
+          font-family:'Space Mono',monospace;font-size:11px;background:none;border:none}
+
+/* AI INSIGHT PANEL */
+.ai-panel{background:linear-gradient(135deg,rgba(30,58,110,.2),rgba(30,58,110,.05));
+          border:1px solid rgba(37,87,167,.3);border-left:3px solid var(--blue-l);
+          padding:20px 24px;margin-bottom:28px}
+.ai-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ai-icon{width:28px;height:28px;background:var(--blue-l);display:flex;align-items:center;
+         justify-content:center;font-size:14px;flex-shrink:0}
+.ai-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;
+          text-transform:uppercase;color:#7EC8E3}
+.ai-content{font-size:14px;line-height:1.7;color:var(--text)}
+.ai-content.loading{color:var(--muted);font-style:italic}
+.ai-actions{display:flex;gap:8px;margin-top:12px}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+          align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-bg.open{display:flex}
+.modal{background:#16162A;border:1px solid var(--border);border-top:2px solid var(--orange);
+       width:min(680px,95vw);max-height:90vh;overflow-y:auto;padding:28px 32px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:28px;margin-bottom:20px;
+             letter-spacing:1px;color:white}
+.modal-title span{color:var(--orange)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;
+      text-transform:uppercase;color:var(--muted)}
+input,select,textarea{background:rgba(255,255,255,.05);border:1px solid var(--border);
+       color:var(--text);padding:9px 12px;font-family:'Sarabun',sans-serif;font-size:14px;
+       outline:none;width:100%;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--orange)}
+select option{background:#16162A}
+.form-section{margin:20px 0 12px;font-family:'Bebas Neue',sans-serif;font-size:18px;
+              color:var(--orange-l);letter-spacing:1px;border-bottom:1px solid var(--border);
+              padding-bottom:6px}
+.pay-row{display:grid;grid-template-columns:1fr 1.2fr auto;gap:10px;align-items:end;margin-bottom:8px}
+.pay-row label{font-size:10px}
+.btn-icon{background:none;border:1px solid var(--border);color:var(--muted);
+          padding:9px 12px;cursor:pointer;font-size:14px;transition:.2s}
+.btn-icon:hover{border-color:var(--red);color:var(--red)}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;
+              padding-top:20px;border-top:1px solid var(--border)}
+
+/* CSV UPLOAD */
+.upload-zone{border:2px dashed rgba(255,255,255,.15);padding:32px;text-align:center;
+             cursor:pointer;transition:.3s;margin-bottom:16px}
+.upload-zone:hover{border-color:var(--orange);background:rgba(232,90,30,.04)}
+.upload-zone.drag{border-color:var(--orange);background:rgba(232,90,30,.08)}
+.upload-icon{font-size:36px;margin-bottom:8px;opacity:.4}
+.upload-text{font-size:13px;color:var(--muted);line-height:1.6}
+.upload-text strong{color:var(--orange-l);display:block;font-size:14px;margin-bottom:4px}
+.csv-template{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);
+              background:rgba(0,0,0,.3);padding:12px;line-height:1.8;overflow-x:auto;
+              white-space:pre;margin-top:12px}
+
+/* INLINE EDIT */
+.editable{cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.25);transition:.15s;padding:1px 3px;border-radius:2px}
+.editable:hover{background:rgba(232,90,30,.15);border-bottom-color:var(--orange)}
+.inline-input{background:rgba(232,90,30,.12);border:1px solid var(--orange);color:white;
+              padding:2px 6px;font-family:'Space Mono',monospace;font-size:12px;
+              outline:none;width:130px;text-align:right;border-radius:2px}
+.edit-hint{font-size:9px;color:rgba(232,90,30,.6);font-family:'Space Mono',monospace;
+           letter-spacing:1px;margin-left:6px}
+.save-flash{animation:sflash .5s ease}
+@keyframes sflash{0%{background:rgba(39,174,96,.25)}100%{background:transparent}}
+.progress-edit-wrap{display:flex;align-items:center;gap:10px;margin-top:8px}
+.progress-edit-wrap input[type=range]{accent-color:var(--orange);flex:1;cursor:pointer}
+.progress-edit-wrap span{font-family:'Bebas Neue',sans-serif;font-size:22px;color:white;min-width:45px}
+
+/* DETAIL PAGE */
+.detail-header{background:rgba(13,13,26,.8);border-bottom:1px solid var(--border);
+               padding:24px 32px;display:flex;align-items:flex-start;
+               justify-content:space-between;gap:20px}
+.back-btn{display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer;
+          font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;
+          background:none;border:none;margin-bottom:10px;transition:.2s}
+.back-btn:hover{color:var(--orange)}
+.detail-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,3vw,38px);
+              color:white;line-height:1.1;letter-spacing:.5px}
+.detail-title span{color:var(--orange)}
+.tag{display:inline-block;padding:3px 10px;font-family:'Space Mono',monospace;
+     font-size:11px;letter-spacing:1px;margin-top:6px}
+.tag-orange{background:rgba(232,90,30,.15);color:var(--orange-l);border:1px solid rgba(232,90,30,.3)}
+.detail-body{padding:28px 32px;position:relative;z-index:1}
+.detail-grid{display:grid;grid-template-columns:1fr 340px;gap:24px}
+.cost-table{width:100%;border-collapse:collapse}
+.cost-table th{background:rgba(232,90,30,.15);color:var(--orange-l);padding:9px 14px;
+               text-align:center;font-family:'Space Mono',monospace;font-size:10px;
+               letter-spacing:2px;border-bottom:2px solid var(--orange)}
+.cost-table th:first-child{text-align:left}
+.cost-table td{padding:11px 14px;text-align:right;border-bottom:1px solid var(--border);
+               font-family:'Space Mono',monospace;font-size:12px}
+.cost-table td:first-child{text-align:left;font-family:'Sarabun',sans-serif;
+                            font-weight:600;font-size:13px}
+.row-budget td{color:var(--text)}
+.row-actual td{color:#7EC8E3}
+.row-dif td{color:var(--green);font-weight:700}
+.row-pct td{color:var(--gold);font-style:italic}
+.card{background:var(--card);border:1px solid var(--border);padding:22px}
+.pay-table{width:100%;border-collapse:collapse;font-size:12px}
+.pay-table th{background:rgba(30,58,110,.35);color:#7EC8E3;padding:7px 10px;
+              font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;
+              text-transform:uppercase;text-align:left}
+.pay-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);
+              font-family:'Space Mono',monospace;font-size:11px}
+.pay-table td:nth-child(3){text-align:right}
+.pay-sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pay-box{padding:9px 12px}
+.pay-box.rec{background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.2)}
+.pay-box.bal{background:rgba(30,58,110,.25);border:1px solid rgba(37,87,167,.3)}
+.pay-box-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;
+             text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.pay-box-val{font-family:'Bebas Neue',sans-serif;font-size:19px}
+.pay-box.rec .pay-box-val{color:var(--green)}
+.pay-box.bal .pay-box-val{color:#7EC8E3}
+
+/* PROGRESS RING */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{stroke:rgba(255,255,255,.08);fill:none;stroke-width:8}
+.ring-fill{fill:none;stroke-width:8;stroke:var(--orange);stroke-linecap:round;
+           transition:stroke-dashoffset 1.5s ease;
+           filter:drop-shadow(0 0 6px rgba(232,90,30,.5))}
+.ring-txt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.ring-pct{font-family:'Bebas Neue',sans-serif;font-size:24px;color:white;line-height:1}
+.ring-lbl{font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* PHOTO CARD */
+.photo-zone{border:2px dashed rgba(255,255,255,.12);min-height:160px;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            cursor:pointer;transition:.3s;position:relative;overflow:hidden}
+.photo-zone:hover{border-color:var(--orange);background:rgba(232,90,30,.05)}
+.photo-zone.filled{border-style:solid;border-color:var(--orange);padding:0}
+.photo-zone img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-overlay{position:absolute;bottom:0;left:0;right:0;
+               background:linear-gradient(transparent,rgba(0,0,0,.8));
+               padding:20px 10px 10px;display:flex;gap:6px;
+               opacity:0;transition:.3s}
+.photo-zone.filled:hover .photo-overlay{opacity:1}
+.phbtn{flex:1;padding:5px;font-size:10px;border:none;cursor:pointer;
+       font-family:'Sarabun',sans-serif;font-weight:700}
+
+/* ALERT BANNER */
+.alert-banner{padding:18px 24px;margin-bottom:18px;border-radius:2px;
+              display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;
+              animation:alertPulse 2s ease-in-out infinite}
+.alert-banner.overrun{background:linear-gradient(135deg,rgba(231,76,60,.18),rgba(231,76,60,.06));
+                       border:1px solid rgba(231,76,60,.5);border-left:5px solid var(--red)}
+.alert-banner.warning{background:linear-gradient(135deg,rgba(241,196,15,.15),rgba(241,196,15,.04));
+                       border:1px solid rgba(241,196,15,.4);border-left:5px solid var(--gold)}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 rgba(231,76,60,0)}
+                       50%{box-shadow:0 0 18px rgba(231,76,60,.25)}}
+.alert-icon{font-size:36px;line-height:1;flex-shrink:0}
+.alert-title{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;letter-spacing:.5px}
+.alert-banner.overrun .alert-title{color:var(--red)}
+.alert-banner.warning .alert-title{color:var(--gold)}
+.alert-detail{font-size:12px;color:var(--muted);margin-top:4px;font-family:'Space Mono',monospace;line-height:1.6}
+.alert-badge{margin-left:auto;padding:6px 14px;font-family:'Bebas Neue',sans-serif;
+             font-size:20px;letter-spacing:1px;border-radius:2px;flex-shrink:0}
+.alert-banner.overrun .alert-badge{background:rgba(231,76,60,.2);color:var(--red);border:1px solid rgba(231,76,60,.4)}
+.alert-banner.warning .alert-badge{background:rgba(241,196,15,.15);color:var(--gold);border:1px solid rgba(241,196,15,.35)}
+
+/* SAVING BANNER */
+.saving-banner{background:linear-gradient(135deg,rgba(39,174,96,.12),rgba(39,174,96,.04));
+               border:1px solid rgba(39,174,96,.25);border-left:4px solid var(--green);
+               padding:24px 28px;display:flex;align-items:center;justify-content:space-between;
+               flex-wrap:wrap;gap:20px;margin-top:18px;position:relative;overflow:hidden}
+.saving-banner::before{content:'';position:absolute;top:-40px;right:-40px;
+                        width:180px;height:180px;border-radius:50%;
+                        background:radial-gradient(circle,rgba(39,174,96,.08),transparent 70%);
+                        pointer-events:none}
+.sav-left-lbl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;
+              text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.sav-left-val{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;
+              filter:drop-shadow(0 0 14px rgba(39,174,96,.4))}
+.sav-left-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.sav-right-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);
+               text-align:right;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
+.sav-right-val{font-family:'Bebas Neue',sans-serif;font-size:64px;
+               line-height:1;text-align:right;
+               filter:drop-shadow(0 0 16px rgba(39,174,96,.45))}
+.sav-right-sub{font-size:12px;text-align:right;margin-top:4px}
+
+/* BAR CHART */
+.bar-group{margin-bottom:16px}
+.bar-meta{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.bar-name{font-family:'Space Mono',monospace;font-weight:700;font-size:12px;color:white}
+.bar-track{height:7px;background:rgba(255,255,255,.06);margin-bottom:3px;overflow:hidden}
+.bar-fill{height:100%;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+.bar-bud{background:rgba(232,90,30,.5)}
+.bar-act{background:var(--blue-l)}
+.bar-vals{display:flex;justify-content:space-between;font-size:10px;
+          color:var(--muted);font-family:'Space Mono',monospace}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.kpi,.chart-card,.proj-table-wrap,.ai-panel{animation:fadeUp .4s ease forwards;opacity:0}
+.kpi:nth-child(1){animation-delay:.05s}.kpi:nth-child(2){animation-delay:.1s}
+.kpi:nth-child(3){animation-delay:.15s}.kpi:nth-child(4){animation-delay:.2s}
+.kpi:nth-child(5){animation-delay:.25s}
+.chart-card:nth-child(1){animation-delay:.15s}.chart-card:nth-child(2){animation-delay:.2s}
+.proj-table-wrap{animation-delay:.25s}.ai-panel{animation-delay:.1s}
+
+/* PAYMENT PROGRESS BAR */
+.pay-progress{height:4px;background:rgba(255,255,255,.06);margin-top:8px;overflow:hidden}
+.pay-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),#2ECC71);
+                   transition:width 1s ease}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state .empty-icon{font-size:48px;margin-bottom:12px;opacity:.3}
+.empty-state p{font-size:14px;margin-bottom:20px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1E3A6E;border:1px solid var(--blue-l);
+       color:white;padding:12px 20px;font-family:'Space Mono',monospace;font-size:12px;
+       z-index:999;transform:translateY(80px);opacity:0;transition:.3s;letter-spacing:.5px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:rgba(39,174,96,.2);border-color:var(--green)}
+.toast.error{background:rgba(231,76,60,.2);border-color:var(--red)}
+
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-row{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .kpi-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-company"><span>Robot System</span> Co., Ltd.</div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" onclick="showPage('summary')" href="#">Summary</a>
+    <a class="nav-link" onclick="showPage('projects')" href="#">Projects</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-outline btn-sm" onclick="openImportModal()">↑ Import CSV</button>
+    <button class="btn btn-outline btn-sm" onclick="resetToDemo()" title="โหลดข้อมูลโปรเจคจาก PowerPoint ใหม่">↺ Reset Data</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Project</button>
+  </div>
+</nav>
+
+<!-- ============ SUMMARY PAGE ============ -->
+<div class="page active" id="page-summary">
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:6px">PROJECT PORTFOLIO</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;color:white">Cost Control <span style="color:var(--orange)">Dashboard</span></div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="runAIAnalysis()" id="ai-btn">✦ AI Analysis</button>
+  </div>
+
+  <!-- AI PANEL -->
+  <div class="ai-panel" id="ai-panel" style="display:none">
+    <div class="ai-header">
+      <div class="ai-icon">✦</div>
+      <div class="ai-title">AI Insights — Portfolio Analysis</div>
+    </div>
+    <div class="ai-content loading" id="ai-content">กำลังวิเคราะห์...</div>
+    <div class="ai-actions">
+      <button class="btn btn-sm btn-outline" onclick="document.getElementById('ai-panel').style.display='none'">ปิด</button>
+      <button class="btn btn-sm btn-outline" onclick="runAIAnalysis()">↺ วิเคราะห์ใหม่</button>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div id="summary-kpis"></div>
+
+  <!-- CHARTS -->
+  <div class="chart-row" id="summary-charts">
+    <div class="chart-card">
+      <div class="sec-title">Budget vs Actual — All Projects</div>
+      <div class="chart-wrap"><canvas id="budgetChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="sec-title">GP% per Project</div>
+      <div class="chart-wrap"><canvas id="gpChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY ALERT BANNER -->
+  <div id="summary-alert-banner"></div>
+
+  <!-- PROJECT TABLE -->
+  <div class="sec-title">All Projects Overview</div>
+  <div class="proj-table-wrap">
+    <table class="proj-table" id="summary-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Project Name</th>
+          <th>Customer</th>
+          <th>End User</th>
+          <th class="num">Contract</th>
+          <th class="num">Budget</th>
+          <th class="num">Actual</th>
+          <th class="num">Saving</th>
+          <th class="num">GP%</th>
+          <th class="num">Progress</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="summary-tbody"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ============ PROJECTS PAGE ============ -->
+<div class="page" id="page-projects">
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:6px">ALL PROJECTS</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;color:white">Project <span style="color:var(--orange)">List</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">+ Add Project</button>
+  </div>
+  <div id="project-cards" class="proj-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px"></div>
+</div>
+</div>
+
+<!-- ============ DETAIL PAGE ============ -->
+<div class="page" id="page-detail">
+  <div class="detail-header" id="detail-header"></div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<!-- ============ ADD/EDIT MODAL ============ -->
+<div class="modal-bg" id="add-modal">
+<div class="modal">
+  <div class="modal-title" id="modal-title">Add <span>Project</span></div>
+  <input type="hidden" id="edit-id">
+
+  <div class="form-row">
+    <div class="form-group full">
+      <label>Project Name *</label>
+      <input id="f-name" placeholder="e.g. Plasma Arc Welding with 3D Vision System">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Customer *</label>
+      <input id="f-customer" placeholder="e.g. TEI, EQ, YAMAZEN">
+    </div>
+    <div class="form-group">
+      <label>End User</label>
+      <input id="f-enduser" placeholder="ถ้าไม่มีใส่ -">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Job Code</label>
+      <input id="f-code" placeholder="e.g. JR-25-07-075">
+    </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Contract Value (฿) *</label>
+      <input id="f-contract" type="number" placeholder="10510000">
+    </div>
+    <div class="form-group">
+      <label>Progress (%)</label>
+      <input id="f-progress" type="number" min="0" max="100" placeholder="85">
+    </div>
+  </div>
+
+  <div class="form-section">BUDGET</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>DM Budget (฿)</label>
+      <input id="f-dm-bud" type="number" placeholder="5874794.15">
+    </div>
+    <div class="form-group">
+      <label>DL Budget (฿)</label>
+      <input id="f-dl-bud" type="number" placeholder="330000">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>OH Budget (฿)</label>
+      <input id="f-oh-bud" type="number" placeholder="710200">
+    </div>
+    <div class="form-group" style="align-items:flex-end">
+      <label style="opacity:0">-</label>
+      <div style="background:rgba(232,90,30,.1);border:1px solid rgba(232,90,30,.2);padding:9px 12px;font-family:'Space Mono',monospace;font-size:12px;color:var(--orange-l)">Total: <span id="bud-total">0</span></div>
+    </div>
+  </div>
+
+  <div class="form-section">ACTUAL COST</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>DM Actual (฿)</label>
+      <input id="f-dm-act" type="number" placeholder="5293170.47">
+    </div>
+    <div class="form-group">
+      <label>DL Actual (฿)</label>
+      <input id="f-dl-act" type="number" placeholder="173210">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>OH Actual (฿)</label>
+      <input id="f-oh-act" type="number" placeholder="0">
+    </div>
+    <div class="form-group" style="align-items:flex-end">
+      <label style="opacity:0">-</label>
+      <div style="background:rgba(37,87,167,.15);border:1px solid rgba(37,87,167,.3);padding:9px 12px;font-family:'Space Mono',monospace;font-size:12px;color:#7EC8E3">Total: <span id="act-total">0</span></div>
+    </div>
+  </div>
+
+  <div class="form-section">PAYMENT TERMS</div>
+  <div id="payment-rows"></div>
+  <button class="btn btn-outline btn-sm" onclick="addPayRow()" style="margin-bottom:16px">+ Add Payment Term</button>
+
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('add-modal')">Cancel</button>
+    <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ IMPORT CSV MODAL ============ -->
+<div class="modal-bg" id="import-modal">
+<div class="modal">
+  <div class="modal-title">Import <span>CSV</span></div>
+  <div class="upload-zone" id="csv-drop" onclick="document.getElementById('csv-file').click()"
+       ondragover="event.preventDefault();this.classList.add('drag')"
+       ondragleave="this.classList.remove('drag')"
+       ondrop="handleCsvDrop(event)">
+    <div class="upload-icon">📄</div>
+    <div class="upload-text">
+      <strong>ลาก CSV มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</strong>
+      รองรับไฟล์ .csv ที่มีข้อมูลโปรเจคตาม format ด้านล่าง
+    </div>
+    <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleCsvFile(event)">
+  </div>
+  <div style="margin-bottom:8px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted)">CSV FORMAT:</div>
+  <div class="csv-template">name,customer,code,contract,progress,dm_budget,dl_budget,oh_budget,dm_actual,dl_actual,oh_actual
+Plasma Arc Welding,Chromalloy,JR-25-07-075,10510000,85,5874794,330000,710200,5293170,173210,0
+Next Project Name,Customer Name,CODE-001,5000000,60,2000000,150000,300000,1800000,120000,0</div>
+  <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+    💡 Payment terms ไม่รวมอยู่ใน CSV — สามารถเพิ่มภายหลังในหน้า Edit Project<br>
+    ⚠️ Import จะ <strong style="color:var(--gold)">เพิ่ม</strong> โปรเจคใหม่ โดยไม่ลบโปรเจคเดิม
+  </div>
+  <div style="text-align:right;margin-top:16px">
+    <button class="btn btn-outline" onclick="closeModal('import-modal')">Cancel</button>
+    <a id="csv-download" download="project_template.csv"
+       href="data:text/csv;charset=utf-8,name%2Ccustomer%2Ccode%2Ccontract%2Cprogress%2Cdm_budget%2Cdl_budget%2Coh_budget%2Cdm_actual%2Cdl_actual%2Coh_actual%0AProject+Name%2CCustomer%2CCODE-001%2C5000000%2C60%2C2000000%2C150000%2C300000%2C1800000%2C120000%2C0"
+       class="btn btn-primary btn-sm" style="margin-left:8px;text-decoration:none">↓ Download Template</a>
+  </div>
+</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== DATA STORE =====================
+const STORE_KEY = 'costctrl_projects_v23';
+
+// Clear stale old keys
+['costctrl_projects','costctrl_projects_v1','costctrl_projects_v2','costctrl_projects_v3','costctrl_projects_v4','costctrl_projects_v5','costctrl_projects_v6','costctrl_projects_v7'].forEach(k=>localStorage.removeItem(k));
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch { return []; }
+}
+function save(data) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(data));
+}
+function getProjects() { return load(); }
+
+// Seed demo data if empty
+function seedDemo() {
+  if (load().length > 0) return;
+  const demo = [
+    {
+      id: 'p1', name: 'Plasma Arc Welding with 3D Vision System',
+      customer: 'CHROMALLOY', end_user: '-', code: 'JR-25-07-075',
+      contract: 10510000, progress: 85,
+      dm_budget: 5874794, dl_budget: 450000, oh_budget: 710200,
+      dm_actual: 5292974, dl_actual: 519912, oh_actual: 114246,
+      status: 'ON TRACK', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down Payment credit 30 days', amount:2102000, status:'Paid'},
+        {term:'After test report credit 30 days', amount:3678500, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:2627500, status:'Paid'},
+        {term:'After Final delivery credit 30 days', amount:1051000, status:'Paid'},
+        {term:'After commissioning credit 30 days', amount:1051000, status:'INV Issued'}
+      ]
+    },
+    {
+      id: 'p2', name: 'Pick & Place System (หน้าเตา)',
+      customer: 'THAI EASTERN INNOVATION', end_user: '-', code: 'JR-24-04-020',
+      contract: 12630000, progress: 75,
+      dm_budget: 7484000, dl_budget: 757140, oh_budget: 265000,
+      dm_actual: 6737144, dl_actual: 605860, oh_actual: 0,
+      status: 'ON TRACK', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down Payment', amount:5052000, status:'Paid'},
+        {term:'After Approve DWG credit 30 days', amount:2526000, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:1894500, status:'Paid'},
+        {term:'After Material on site credit 30 days', amount:1263000, status:'Pending'},
+        {term:'After Handover credit 30 days', amount:1894500, status:'Pending'}
+      ]
+    },
+    {
+      id: 'p3', name: 'Palletizing Full System (ลงลัง)',
+      customer: 'EQ RUBBER', end_user: '-', code: 'JR-24-04-019',
+      contract: 12630000, progress: 80,
+      dm_budget: 9600000, dl_budget: 903933, oh_budget: 326800,
+      dm_actual: 8722636, dl_actual: 516293, oh_actual: 0,
+      status: 'MONITOR', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down Payment', amount:5052000, status:'Paid'},
+        {term:'After Approve DWG credit 30 days', amount:2526000, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:1894500, status:'Paid'},
+        {term:'After Material on site credit 30 days', amount:1263000, status:'INV issued'},
+        {term:'After Handover credit 30 days', amount:1894500, status:'Pending'}
+      ]
+    },
+    {
+      id: 'p4', name: 'Pick & Place System (หน้าเตา)',
+      customer: 'EQ RUBBER', end_user: '-', code: 'JR-24-04-018',
+      contract: 11396703, progress: 100,
+      dm_budget: 7291885, dl_budget: 757140, oh_budget: 284900,
+      dm_actual: 7223240, dl_actual: 493983, oh_actual: 0,
+      status: 'COMPLETED', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down Payment 40%', amount:4558681, status:'Paid'},
+        {term:'After Approve DWG 20%', amount:2279340, status:'Paid'},
+        {term:'After FAT 15%', amount:1709506, status:'Paid'},
+        {term:'After Material on site 10%', amount:1139670, status:'Paid'},
+        {term:'After Handover 15%', amount:1709506, status:'Paid'},
+      ]
+    },
+    {
+      id: 'p5', name: 'Machine Tending System',
+      customer: 'YAMAZEN', end_user: 'FCC', code: 'JR-25-10-108',
+      contract: 10155000, progress: 40,
+      dm_budget: 4871370, dl_budget: 655100, oh_budget: 563198,
+      dm_actual: 4107272, dl_actual: 374320, oh_actual: 0,
+      status: 'MONITOR', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down payment', amount:4062000, status:'Paid'},
+        {term:'Before delivery credit 30 days', amount:4062000, status:'Pending'},
+        {term:'After Inspection credit 30 days', amount:2031000, status:'Pending'}
+      ]
+    },
+    {
+      id: 'p6', name: 'Robot Pallet System & Auto Packing Line',
+      customer: 'TC UNION', end_user: '-', code: 'JR-25-12-140',
+      contract: 9000000, progress: 30,
+      dm_budget: 6944000, dl_budget: 100000, oh_budget: 40000,
+      dm_actual: 5620396, dl_actual: 32974, oh_actual: 0,
+      status: 'MONITOR', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down payment', amount:3600000, status:'Paid'},
+        {term:'After delivery & Layout credit 7 days', amount:4500000, status:'Pending'},
+        {term:'After handover credit 30 days', amount:900000, status:'Pending'}
+      ]
+    },
+    {
+      id: 'p7', name: 'Palletizing (ลงลัง)',
+      customer: 'THAI EASTERN INNOVATION', end_user: '-', code: 'JR-24-04-021',
+      contract: 8190000, progress: 70,
+      dm_budget: 6185667, dl_budget: 602622, oh_budget: 239800,
+      dm_actual: 4959600, dl_actual: 690336, oh_actual: 0,
+      status: 'COST OVERRUN', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down Payment', amount:3276000, status:'Paid'},
+        {term:'After Approve DWG credit 30 days', amount:1638000, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:1228500, status:'Paid'},
+        {term:'After Material on site credit 30 days', amount:819000, status:'Pending'},
+        {term:'After Handover credit 30 days', amount:1228500, status:'Pending'}
+      ]
+    },
+    {
+      id: 'p8', name: 'Vision Inspection Machine',
+      customer: 'YAMAZEN', end_user: 'RICOH', code: 'JR-25-12-137',
+      contract: 2090000, progress: 70,
+      dm_budget: 1119300, dl_budget: 150000, oh_budget: 109550,
+      dm_actual: 907503, dl_actual: 166183, oh_actual: 0,
+      status: 'MONITOR', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down payment', amount:836000, status:'Paid'},
+        {term:'Before delivery credit 30 days', amount:1045000, status:'INV Issued'},
+        {term:'After handover credit 30 days', amount:209000, status:'INV Issued'}
+      ]
+    },
+    {
+      id: 'p9', name: 'Robot Offset – Plastic Part Deviation',
+      customer: 'UD TRUCKS', end_user: '-', code: 'JR-25-08-094',
+      contract: 1630500, progress: 90,
+      dm_budget: 732150, dl_budget: 250018, oh_budget: 41993,
+      dm_actual: 523436, dl_actual: 323751, oh_actual: 0,
+      status: 'ON TRACK', photo: null, photoCaption: '',
+      payments: [
+        {term:'After PO 7 days', amount:815250, status:'Paid'},
+        {term:'After Delivery credit 30 days', amount:489150, status:'Paid'},
+        {term:'After Installation 30 days', amount:326100, status:'Paid'}
+      ]
+    },
+    {
+      id: 'p10', name: 'Machine Tending',
+      customer: 'YAMAZEN', end_user: 'SUMITOMO', code: 'JR-25-10-111',
+      contract: 1229300, progress: 50,
+      dm_budget: 755637, dl_budget: 98400, oh_budget: 42305,
+      dm_actual: 561884, dl_actual: 368269, oh_actual: 3050,
+      status: 'MONITOR', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down payment 40%', amount:491720, status:'Paid'},
+        {term:'Before Delivery credit 30 days 40%', amount:491721, status:'INV Issued'},
+        {term:'After Inspection credit 30 days 20%', amount:245860, status:'Pending'},
+      ]
+    },
+    {
+      id: 'p11', name: 'Modify HWAL2.0 to NPI Line Phase 1',
+      customer: 'DONALDSON', end_user: '-', code: 'JR-26-02-015/016',
+      contract: 622000, progress: 13,
+      dm_budget: 148000, dl_budget: 155000, oh_budget: 20000,
+      dm_actual: 54834, dl_actual: 247266, oh_actual: 0,
+      status: 'MONITOR', photo: null, photoCaption: '',
+      payments: [
+        {term:'After PO', amount:311000, status:'Paid'},
+        {term:'After delivery credit 30 days', amount:248800, status:'Pending'},
+        {term:'After handover credit 30 days', amount:62200, status:'Pending'},
+      ]
+    },
+    {
+      id: 'p12', name: 'Safety Door & Safety Dicing Machine',
+      customer: 'YAMAZEN', end_user: 'RICOH', code: 'JR-25-10-114',
+      contract: 310000, progress: 100,
+      dm_budget: 88890, dl_budget: 65400, oh_budget: 25400,
+      dm_actual: 57035, dl_actual: 52078, oh_actual: 14321,
+      status: 'COMPLETED', photo: null, photoCaption: '',
+      payments: [
+        {term:'Down payment', amount:186000, status:'Paid'},
+        {term:'Before delivery credit 30 days', amount:124000, status:'Paid'}
+      ]
+    },
+  ];
+  save(demo);
+}
+
+// ===================== HELPERS =====================
+function fmt(n) {
+  if (!n && n !== 0) return '—';
+  return Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtM(n) {
+  if (!n && n !== 0) return '—';
+  const m = n / 1000000;
+  return m >= 1 ? m.toFixed(2) + 'M' : (n/1000).toFixed(0) + 'K';
+}
+function uid() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+function budgetTotal(p) { return (+p.dm_budget||0)+(+p.dl_budget||0)+(+p.oh_budget||0); }
+function actualTotal(p)  { return (+p.dm_actual||0)+(+p.dl_actual||0)+(+p.oh_actual||0); }
+function saving(p)       { return budgetTotal(p) - actualTotal(p); }
+function gpPct(p)        { const c=+p.contract||0; const a=actualTotal(p); return c>0?((c-a)/c*100):0; }
+function budgetGP(p)     { const c=+p.contract||0; const b=budgetTotal(p); return c>0?((c-b)/c*100):0; }
+function payReceived(p)  {
+  if (!p.payments) return 0;
+  return p.payments.filter(x=>x.status==='Paid').reduce((s,x)=>s+(+x.amount||0),0);
+}
+function statusColor(s) {
+  if (!s) return 'var(--muted)';
+  const l = s.toLowerCase();
+  if (l==='paid') return 'var(--green)';
+  if (l.includes('inv')) return 'var(--gold)';
+  return 'var(--muted)';
+}
+function projectStatusBadge(p) {
+  // Auto-derive status from data if not stored
+  const sav = saving(p);
+  const stored = p.status;
+  let s = stored;
+  if (!s) {
+    if (p.progress >= 100) s = 'COMPLETED';
+    else if (sav < 0) s = 'COST OVERRUN';
+    else s = 'ON TRACK';
+  }
+  const cfg = {
+    'COMPLETED':   {bg:'rgba(39,174,96,.15)',  c:'#27AE60', icon:'✓'},
+    'SUCCESS':     {bg:'rgba(39,174,96,.15)',  c:'#2ECC71', icon:'★'},
+    'ON TRACK':    {bg:'rgba(37,87,167,.2)',   c:'#7EC8E3', icon:'→'},
+    'MONITOR':     {bg:'rgba(243,156,18,.15)', c:'#F39C12', icon:'◎'},
+    'COLLECT NOW': {bg:'rgba(243,156,18,.2)',  c:'#E67E22', icon:'!'},
+    'COST OVERRUN':{bg:'rgba(231,76,60,.15)',  c:'#E74C3C', icon:'✕'},
+  };
+  const st = cfg[s] || {bg:'rgba(255,255,255,.05)', c:'var(--muted)', icon:'·'};
+  return `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:${st.bg};color:${st.c};font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.5px;white-space:nowrap">${st.icon} ${s}</span>`;
+}
+function statusBadge(s) {
+  if (!s||s==='Pending') return `<span style="color:var(--muted);font-size:10px">Pending</span>`;
+  if (s==='Paid') return `<span class="status-chip" style="background:rgba(39,174,96,.15);color:var(--green)">PAID</span>`;
+  return `<span class="status-chip" style="background:rgba(243,156,18,.15);color:var(--gold)">${s}</span>`;
+}
+
+// ===================== NAVIGATION =====================
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  const lnk = document.querySelector(`.nav-link[onclick*="${p}"]`);
+  if (lnk) lnk.classList.add('active');
+  if (p === 'summary') renderSummary();
+  if (p === 'projects') renderProjectCards();
+}
+
+// ===================== SUMMARY =====================
+let charts = {};
+function renderSummary() {
+  const projects = getProjects();
+  renderSummaryKPIs(projects);
+  renderSummaryAlerts(projects);
+  renderSummaryTable(projects);
+  renderCharts(projects);
+}
+
+function renderSummaryAlerts(projects) {
+  const el = document.getElementById('summary-alert-banner');
+  if (!el) return;
+
+  const overrun = projects.filter(p => saving(p) < 0);
+  const nearBudget = projects.filter(p => {
+    const bud = budgetTotal(p), act = actualTotal(p);
+    return saving(p) >= 0 && bud > 0 && (act/bud) >= 0.85;
+  });
+  const lowGP = projects.filter(p => saving(p) >= 0 && gpPct(p) < 35 && gpPct(p) >= 0 && budgetTotal(p) > 0);
+
+  let html = '';
+
+  if (overrun.length > 0) {
+    const names = overrun.map(p => `<span style="display:inline-flex;flex-direction:column;gap:1px;margin:3px 6px 3px 0;padding:4px 8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+  <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:.5px">${p.code||'—'}</span>
+  <span style="font-size:11px;color:white;font-weight:700">${p.name.length>30?p.name.slice(0,28)+'…':p.name}</span>
+  <span style="font-size:10px;color:var(--muted)">${p.customer||'—'}</span>
+</span>`).join('');
+    html += `
+    <div style="display:flex;align-items:center;gap:16px;padding:16px 24px;margin-bottom:10px;
+      background:linear-gradient(135deg,rgba(231,76,60,.2),rgba(231,76,60,.07));
+      border:1px solid rgba(231,76,60,.4);border-left:4px solid var(--red);
+      animation:alertPulse 2s ease-in-out infinite">
+      <div style="font-size:32px;flex-shrink:0">🚨</div>
+      <div style="flex:1">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red);letter-spacing:.5px">COST OVERRUN — ${overrun.length} โปรเจค</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${names}</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;padding:6px 16px;background:rgba(231,76,60,.2);color:var(--red);border:1px solid rgba(231,76,60,.4)">ACTION REQUIRED</div>
+    </div>`;
+  }
+
+  if (nearBudget.length > 0) {
+    const names = nearBudget.map(p => `<span style="display:inline-flex;flex-direction:column;gap:1px;margin:3px 6px 3px 0;padding:4px 8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+  <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:.5px">${p.code||'—'}</span>
+  <span style="font-size:11px;color:white;font-weight:700">${p.name.length>30?p.name.slice(0,28)+'…':p.name}</span>
+  <span style="font-size:10px;color:var(--muted)">${p.customer||'—'}</span>
+</span>`).join('');
+    html += `
+    <div style="display:flex;align-items:center;gap:16px;padding:14px 24px;margin-bottom:10px;
+      background:linear-gradient(135deg,rgba(243,156,18,.15),rgba(243,156,18,.04));
+      border:1px solid rgba(243,156,18,.35);border-left:4px solid var(--gold)">
+      <div style="font-size:28px;flex-shrink:0">⚡</div>
+      <div style="flex:1">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:.5px">ใกล้หมด Budget — ${nearBudget.length} โปรเจค</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${names}</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;padding:5px 14px;background:rgba(243,156,18,.15);color:var(--gold);border:1px solid rgba(243,156,18,.35)">MONITOR</div>
+    </div>`;
+  }
+
+  if (lowGP.length > 0) {
+    const names = lowGP.map(p => `<span style="display:inline-flex;flex-direction:column;gap:1px;margin:3px 6px 3px 0;padding:4px 8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+  <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:.5px">${p.code||'—'}</span>
+  <span style="font-size:11px;color:white;font-weight:700">${p.name.length>30?p.name.slice(0,28)+'…':p.name}</span>
+  <span style="font-size:10px;color:var(--muted)">${p.customer||'—'}</span>
+</span>`).join('');
+    html += `
+    <div style="display:flex;align-items:center;gap:16px;padding:14px 24px;margin-bottom:10px;
+      background:linear-gradient(135deg,rgba(243,156,18,.1),rgba(243,156,18,.03));
+      border:1px solid rgba(243,156,18,.25);border-left:4px solid var(--gold)">
+      <div style="font-size:28px;flex-shrink:0">⚠️</div>
+      <div style="flex:1">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:.5px">GP ต่ำกว่า 35% — ${lowGP.length} โปรเจค</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${names}</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;padding:5px 14px;background:rgba(243,156,18,.1);color:var(--gold);border:1px solid rgba(243,156,18,.25)">LOW GP</div>
+    </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function renderSummaryKPIs(projects) {
+  const totalContract = projects.reduce((s,p)=>s+(+p.contract||0),0);
+  const totalBudget   = projects.reduce((s,p)=>s+budgetTotal(p),0);
+  const totalActual   = projects.reduce((s,p)=>s+actualTotal(p),0);
+  const totalSaving   = totalBudget - totalActual;
+  const totalReceived = projects.reduce((s,p)=>s+payReceived(p),0);
+  const avgGP = projects.length ? projects.reduce((s,p)=>s+gpPct(p),0)/projects.length : 0;
+
+  document.getElementById('summary-kpis').innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi k1">
+        <div class="kpi-label">Total Contract</div>
+        <div class="kpi-val">${fmtM(totalContract)}</div>
+        <div class="kpi-sub">฿ ${fmt(totalContract)}</div>
+        <span class="kpi-badge badge-o">${projects.length} Projects</span>
+      </div>
+      <div class="kpi k2">
+        <div class="kpi-label">Total Budget</div>
+        <div class="kpi-val">${fmtM(totalBudget)}</div>
+        <div class="kpi-sub">฿ ${fmt(totalBudget)}</div>
+        <span class="kpi-badge badge-b">COGS Budget</span>
+      </div>
+      <div class="kpi k3">
+        <div class="kpi-label">Total Actual</div>
+        <div class="kpi-val">${fmtM(totalActual)}</div>
+        <div class="kpi-sub">฿ ${fmt(totalActual)}</div>
+        <span class="kpi-badge badge-g">${totalActual<totalBudget?'Under Budget':'Over Budget'}</span>
+      </div>
+      <div class="kpi k4">
+        <div class="kpi-label">Total Saving</div>
+        <div class="kpi-val">${fmtM(Math.abs(totalSaving))}</div>
+        <div class="kpi-sub">฿ ${fmt(totalSaving)}</div>
+        <span class="kpi-badge ${totalSaving>=0?'badge-g':'badge-r'}">${totalSaving>=0?'Under Budget':'Over Budget'}</span>
+      </div>
+      <div class="kpi k5">
+        <div class="kpi-label">Avg GP%</div>
+        <div class="kpi-val">${avgGP.toFixed(1)}%</div>
+        <div class="kpi-sub">Received: ${fmtM(totalReceived)}</div>
+        <span class="kpi-badge badge-gold">Portfolio</span>
+      </div>
+    </div>`;
+}
+
+function renderSummaryTable(projects) {
+  if (!projects.length) {
+    document.getElementById('summary-tbody').innerHTML = `<tr><td colspan="11">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>ยังไม่มีโปรเจค — กด "+ Add Project" เพื่อเพิ่มโปรเจคแรก</p>
+        <button class="btn btn-primary" onclick="openAddModal()">+ Add Project</button>
+      </div></td></tr>`;
+    return;
+  }
+  const rows = projects.map((p,i) => {
+    const bud = budgetTotal(p), act = actualTotal(p), sav = saving(p), gp = gpPct(p);
+    const rec = payReceived(p), recPct = p.contract ? (rec/p.contract*100) : 0;
+    const isOverrun = sav < 0;
+    const isNear = !isOverrun && bud > 0 && (act/bud) >= 0.85;
+    const rowStyle = isOverrun
+      ? 'background:rgba(231,76,60,0.07);border-left:3px solid rgba(231,76,60,0.6)'
+      : isNear ? 'background:rgba(243,156,18,0.06);border-left:3px solid rgba(243,156,18,0.5)' : '';
+    return `<tr style="${rowStyle}">
+      <td style="color:var(--muted)">${i+1}</td>
+      <td class="name-cell">
+        <button class="link-btn" onclick="showDetail('${p.id}')">${p.name}</button>
+        ${p.code?`<div style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;letter-spacing:.5px">${p.code}</div>`:''}
+      </td>
+      <td style="font-size:11px;color:var(--muted)">${p.customer||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${p.end_user||'-'}</td>
+      <td class="num">${fmtM(p.contract)}</td>
+      <td class="num">${fmtM(bud)}</td>
+      <td class="num" style="color:#7EC8E3">${fmtM(act)}</td>
+      <td class="num" style="color:${sav>=0?'var(--green)':'var(--red)'}">${fmtM(sav)}</td>
+      <td class="num">
+        <span style="color:${gp>=35?'var(--green)':gp>=25?'var(--gold)':'var(--red)'};font-weight:700">
+          ${gp.toFixed(1)}%
+        </span>
+      </td>
+      <td class="num">${p.progress||0}%</td>
+      <td>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">
+          ${fmtM(rec)} / ${fmtM(p.contract)}
+        </div>
+        <div class="pay-progress">
+          <div class="pay-progress-fill" style="width:${Math.min(recPct,100)}%"></div>
+        </div>
+      </td>
+      <td>${projectStatusBadge(p)}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-outline btn-sm" onclick="showDetail('${p.id}')">View</button>
+          <button class="btn btn-outline btn-sm" onclick="openEditModal('${p.id}')">Edit</button>
+          <button class="btn btn-sm" style="background:rgba(231,76,60,.15);color:var(--red);border:1px solid rgba(231,76,60,.3)" onclick="deleteProject('${p.id}')">Del</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('summary-tbody').innerHTML = rows;
+}
+
+function renderCharts(projects) {
+  if (!projects.length) return;
+  const labels = projects.map(p => p.name.length > 20 ? p.name.slice(0,18)+'…' : p.name);
+  const budgets = projects.map(p => budgetTotal(p));
+  const actuals = projects.map(p => actualTotal(p));
+  const gps     = projects.map(p => gpPct(p));
+
+  // Destroy old
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+
+  const opts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#7788AA', font: { family: 'Space Mono', size: 10 } } } },
+    scales: {
+      x: { ticks: { color: '#7788AA', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.05)' } },
+      y: { ticks: { color: '#7788AA', font: { size: 10 }, callback: v => fmtM(v) }, grid: { color: 'rgba(255,255,255,.05)' } }
+    }
+  };
+
+  charts.budget = new Chart(document.getElementById('budgetChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Budget', data: budgets, backgroundColor: 'rgba(232,90,30,.5)', borderColor: 'rgba(232,90,30,.8)', borderWidth: 1 },
+        { label: 'Actual', data: actuals, backgroundColor: 'rgba(37,87,167,.6)', borderColor: 'rgba(37,87,167,.9)', borderWidth: 1 }
+      ]
+    },
+    options: { ...opts, plugins: { ...opts.plugins } }
+  });
+
+  charts.gp = new Chart(document.getElementById('gpChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Budget GP%', data: projects.map(p=>budgetGP(p)), backgroundColor: 'rgba(232,90,30,.4)', borderColor: 'rgba(232,90,30,.7)', borderWidth: 1 },
+        { label: 'Actual GP%', data: gps, backgroundColor: gps.map(g=>g>30?'rgba(39,174,96,.6)':g>15?'rgba(243,156,18,.6)':'rgba(231,76,60,.6)'), borderColor: 'rgba(39,174,96,.8)', borderWidth: 1 }
+      ]
+    },
+    options: {
+      ...opts,
+      scales: {
+        x: opts.scales.x,
+        y: { ...opts.scales.y, ticks: { ...opts.scales.y.ticks, callback: v => v.toFixed(1)+'%' } }
+      }
+    }
+  });
+}
+
+// ===================== DETAIL PAGE =====================
+function showDetail(id) {
+  const projects = getProjects();
+  const p = projects.find(x=>x.id===id);
+  if (!p) return;
+
+  const bud = budgetTotal(p), act = actualTotal(p), sav = saving(p), gp = gpPct(p);
+  const dmSav = (+p.dm_budget||0)-(+p.dm_actual||0);
+  const dlSav = (+p.dl_budget||0)-(+p.dl_actual||0);
+  const ohSav = (+p.oh_budget||0)-(+p.oh_actual||0);
+  const dmPct = p.dm_budget ? (dmSav/p.dm_budget*100) : 0;
+  const dlPct = p.dl_budget ? (dlSav/p.dl_budget*100) : 0;
+  const r = 40, circ = 2*Math.PI*r, offset = circ*(1-(+p.progress||0)/100);
+
+  // Header — slider only, remove ring (ring stays in right panel KPI area)
+  document.getElementById('detail-header').innerHTML = `
+    <div style="flex:1">
+      <button class="back-btn" onclick="showPage('summary')">← Back to Summary</button>
+      <div class="detail-title">${p.name.split(' ').slice(0,4).join(' ')}<br><span>${p.name.split(' ').slice(4).join(' ')}</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center">
+        <span>Customer: <strong>${p.customer||'—'}</strong></span>
+        <span style="color:var(--muted)">End User: <strong style="color:var(--text)">${p.end_user||'-'}</strong></span>
+        ${p.code?`<span class="tag tag-orange">${p.code}</span>`:''}
+        ${projectStatusBadge(p)}
+      </div>
+    </div>
+    <button onclick="showPage('summary')" title="Close"
+      style="position:fixed;top:80px;right:24px;z-index:200;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px);"
+      onmouseover="this.style.background='rgba(232,90,30,0.8)';this.style.borderColor='#E85A1E'"
+      onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.18)'">✕</button>`;
+
+  // Body
+  const payRows = (p.payments||[]).map(pm=>`
+    <tr>
+      <td>${pm.term}</td>
+      <td style="text-align:right">${fmt(pm.amount)}</td>
+      <td>${statusBadge(pm.status)}</td>
+    </tr>`).join('');
+
+  const rec = payReceived(p), bal = (+p.contract||0) - rec;
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-grid">
+      <div>
+        <!-- Alert banner placeholder -->
+        <div id="alert-banner-${p.id}"></div>
+        <!-- KPI mini row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+          <div class="card" style="padding:14px 16px" id="kpi-contract-${p.id}">
+            <div class="kpi-label">Contract Value</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:white">${fmtM(p.contract)}</div>
+            <div style="font-size:11px;color:var(--muted)">฿ ${fmt(p.contract)}</div>
+          </div>
+          <div class="card" style="padding:14px 16px" id="kpi-budget-${p.id}">
+            <div class="kpi-label">Sales Budget</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:white">${fmtM(bud)}</div>
+            <div style="font-size:11px;color:var(--muted)">GP Budget: ${budgetGP(p).toFixed(1)}%</div>
+          </div>
+          <div class="card" style="padding:14px 16px;border-top:2px solid var(--green)" id="kpi-gp-${p.id}">
+            <div class="kpi-label">Actual GP%</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--green)">${gp.toFixed(1)}%</div>
+            <div style="font-size:11px;color:var(--green)">+${(gp-budgetGP(p)).toFixed(1)}% vs Budget</div>
+          </div>
+        </div>
+
+        <!-- Cost table -->
+        <div class="card" style="margin-bottom:18px" id="cost-card-${p.id}">
+          <div class="sec-title" style="display:flex;align-items:center;gap:8px">
+            Budget vs Actual — Cost Breakdown
+            <span class="edit-hint">✎ คลิกตัวเลขเพื่อแก้ไข</span>
+          </div>
+          <table class="cost-table" id="cost-tbl-${p.id}">
+            <thead>
+              <tr><th>Details</th><th>DM</th><th>DL</th><th>OH</th><th>Total</th></tr>
+            </thead>
+            <tbody id="cost-tbody-${p.id}">
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bar visual -->
+        <div class="card" style="margin-bottom:18px" id="bar-card-${p.id}">
+          <div class="sec-title">Visual Comparison</div>
+          <div id="bar-body-${p.id}"></div>
+          <div style="display:flex;gap:16px;justify-content:flex-end;margin-top:8px">
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)">
+              <div style="width:16px;height:3px;background:rgba(232,90,30,.5)"></div>Budget
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)">
+              <div style="width:16px;height:3px;background:var(--blue-l)"></div>Actual
+            </div>
+          </div>
+        </div>
+
+        <!-- Saving banner -->
+        <div class="saving-banner" id="sav-banner-${p.id}">
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div>
+        <!-- Progress ring + slider -->
+        <div class="card" style="margin-bottom:18px;padding:20px 24px">
+          <div class="sec-title">Project Progress</div>
+          <div style="display:flex;align-items:center;gap:24px">
+            <div class="ring-wrap" style="position:relative;flex-shrink:0">
+              <svg width="90" height="90" viewBox="0 0 100 100">
+                <circle class="ring-bg" cx="50" cy="50" r="${r}"/>
+                <circle class="ring-fill" id="ring-fill-${p.id}" cx="50" cy="50" r="${r}"
+                  style="stroke-dasharray:${circ.toFixed(1)};stroke-dashoffset:${offset.toFixed(1)}"/>
+              </svg>
+              <div class="ring-txt">
+                <div class="ring-pct" id="ring-pct-${p.id}">${p.progress||0}%</div>
+                <div class="ring-lbl">Done</div>
+              </div>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-family:'Space Mono',monospace">
+                ลาก slider เพื่ออัปเดต
+              </div>
+              <div class="progress-edit-wrap">
+                <input type="range" min="0" max="100" value="${p.progress||0}"
+                       oninput="updateProgressLive('${p.id}',this.value)"
+                       onchange="saveProgressInline('${p.id}',this.value)">
+                <span id="prog-val-${p.id}" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:white;min-width:55px">${p.progress||0}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo -->
+        <div class="card" style="margin-bottom:18px">
+          <div class="sec-title">Site Photo</div>
+          <div class="photo-zone ${p.photo?'filled':''}" id="detail-photo" onclick="triggerDetailPhoto('${p.id}')">
+            ${p.photo
+              ? `<img src="${p.photo}" alt="site photo">
+                 <div class="photo-overlay">
+                   <button class="phbtn" style="background:var(--orange);color:white" onclick="triggerDetailPhoto('${p.id}');event.stopPropagation()">เปลี่ยน</button>
+                   <button class="phbtn" style="background:rgba(255,255,255,.2);color:white" onclick="removeDetailPhoto('${p.id}');event.stopPropagation()">ลบ</button>
+                 </div>`
+              : `<div class="upload-icon">📷</div>
+                 <div class="upload-text"><strong>อัปโหลดรูปหน้างาน</strong>คลิกเพื่อเลือกรูป</div>`
+            }
+          </div>
+          <input type="file" id="detail-photo-input" accept="image/*" style="display:none"
+                 onchange="saveDetailPhoto('${p.id}', event)">
+          ${p.photoCaption?`<div style="font-size:12px;color:var(--muted);margin-top:8px;padding:6px 0;border-top:1px solid var(--border)">${p.photoCaption}</div>`:''}
+        </div>
+
+        <!-- Payment -->
+        <div class="card">
+          <div class="sec-title">Payment Status</div>
+          <table class="pay-table">
+            <thead><tr><th>Term</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>${payRows||'<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:12px">No payment terms</td></tr>'}</tbody>
+          </table>
+          <div class="pay-sum">
+            <div class="pay-box rec">
+              <div class="pay-box-lbl">Received</div>
+              <div class="pay-box-val">${fmtM(rec)}</div>
+            </div>
+            <div class="pay-box bal">
+              <div class="pay-box-lbl">Balance</div>
+              <div class="pay-box-val">${fmtM(bal)}</div>
+            </div>
+          </div>
+
+          <!-- Payment Collection Bar -->
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+              <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">Payment Collection</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:white">${(+p.contract?rec/+p.contract*100:0).toFixed(1)}%</div>
+            </div>
+            <!-- Stacked bar: Paid / INV / Pending -->
+            <div style="height:28px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;display:flex;position:relative">
+              ${(()=>{
+                const total = +p.contract||1;
+                let paidAmt=0, invAmt=0;
+                (p.payments||[]).forEach(pm=>{
+                  const a = +pm.amount||0;
+                  if (pm.status==='Paid') paidAmt+=a;
+                  else if (pm.status && pm.status.toUpperCase().startsWith('INV')) invAmt+=a;
+                });
+                const paidPct = Math.min(100,(paidAmt/total*100)).toFixed(1);
+                const invPct  = Math.min(100,((paidAmt+invAmt)/total*100)).toFixed(1);
+                return `<div style="width:${paidPct}%;background:var(--green);transition:.6s;display:flex;align-items:center;justify-content:center">
+                          ${paidPct>8?`<span style="font-size:10px;font-family:'Space Mono',monospace;color:rgba(0,0,0,.7);font-weight:700">${paidPct}%</span>`:''}
+                        </div>
+                        <div style="width:${Math.max(0,invPct-paidPct)}%;background:var(--gold);transition:.6s;display:flex;align-items:center;justify-content:center">
+                          ${(invPct-paidPct)>5?`<span style="font-size:10px;font-family:'Space Mono',monospace;color:rgba(0,0,0,.7);font-weight:700">INV</span>`:''}
+                        </div>`;
+              })()}
+            </div>
+            <!-- Legend + amounts -->
+            <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+                <div style="width:10px;height:10px;background:var(--green);border-radius:1px;flex-shrink:0"></div>
+                Paid <strong style="color:var(--green);margin-left:3px">${fmtM(rec)}</strong>
+              </div>
+              ${(()=>{
+                let invAmt=0;
+                (p.payments||[]).forEach(pm=>{ if(pm.status&&pm.status.toUpperCase().startsWith('INV')) invAmt+=(+pm.amount||0); });
+                return invAmt>0?`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+                  <div style="width:10px;height:10px;background:var(--gold);border-radius:1px;flex-shrink:0"></div>
+                  Invoice <strong style="color:var(--gold);margin-left:3px">${fmtM(invAmt)}</strong>
+                </div>`:'';
+              })()}
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+                <div style="width:10px;height:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:1px;flex-shrink:0"></div>
+                Pending <strong style="color:var(--muted);margin-left:3px">${fmtM(bal<0?0:bal)}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn btn-outline" style="flex:1" onclick="openEditModal('${p.id}')">✎ Edit Project</button>
+          <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3)" onclick="deleteProject('${p.id}')">Del</button>
+        </div>
+      </div>
+    </div>`;
+
+  showPage('detail');
+  // Render reactive parts
+  setTimeout(() => renderDetailReactive(id), 0);
+}
+
+function barGroup(label, bud, act) {
+  bud = +bud||0; act = +act||0;
+  const max = Math.max(bud, act, 1);
+  const bPct = (bud/max*100).toFixed(1);
+  const aPct = (act/max*100).toFixed(1);
+  const sav  = bud - act;
+  const savPct = bud ? (sav/bud*100).toFixed(1) : 0;
+  return `<div class="bar-group">
+    <div class="bar-meta">
+      <span class="bar-name">${label}</span>
+      <span style="font-size:11px;color:${sav>=0?'var(--green)':'var(--red)'}">${sav>=0?'Saved':'Over'} ${Math.abs(savPct)}%</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill bar-bud" style="width:${bPct}%"></div></div>
+    <div class="bar-track"><div class="bar-fill bar-act" style="width:${aPct}%"></div></div>
+    <div class="bar-vals">
+      <span style="color:rgba(232,90,30,.7)">Budget: ${fmt(bud)}</span>
+      <span style="color:var(--blue-l)">${act?'Actual: '+fmt(act):'Not yet'}</span>
+    </div>
+  </div>`;
+}
+
+// ---- Reactive detail renderers ----
+function renderDetailReactive(pid) {
+  const projects = getProjects();
+  const p = projects.find(x=>x.id===pid);
+  if (!p) return;
+  const bud = budgetTotal(p), act = actualTotal(p), sav = saving(p), gp = gpPct(p);
+  const dmSav = (+p.dm_budget||0)-(+p.dm_actual||0);
+  const dlSav = (+p.dl_budget||0)-(+p.dl_actual||0);
+  const ohSav = (+p.oh_budget||0)-(+p.oh_actual||0);
+  const dmPct = p.dm_budget ? (dmSav/p.dm_budget*100) : 0;
+  const dlPct = p.dl_budget ? (dlSav/p.dl_budget*100) : 0;
+
+  // Alert banner
+  const alertEl = document.getElementById('alert-banner-'+pid);
+  if (alertEl) {
+    const overAmt = act - bud;
+    const overPct = bud ? (overAmt/bud*100) : 0;
+    const dmOver  = (+p.dm_actual||0) - (+p.dm_budget||0);
+    const dlOver  = (+p.dl_actual||0) - (+p.dl_budget||0);
+
+    if (sav < 0) {
+      // COST OVERRUN
+      const details = [];
+      if (dmOver > 0) details.push(`DM เกิน ฿${fmt(dmOver)}`);
+      if (dlOver > 0) details.push(`DL เกิน ฿${fmt(dlOver)}`);
+      alertEl.innerHTML = `
+        <div class="alert-banner overrun">
+          <div class="alert-icon">🚨</div>
+          <div>
+            <div class="alert-title">COST OVERRUN — เกิน Budget</div>
+            <div class="alert-detail">
+              Actual ฿${fmt(act)} &gt; Budget ฿${fmt(bud)}<br>
+              ${details.length ? details.join(' &nbsp;|&nbsp; ') : ''}
+            </div>
+          </div>
+          <div class="alert-badge">-฿${fmt(Math.abs(sav))}</div>
+        </div>`;
+    } else if (gp < 25) {
+      // LOW GP WARNING
+      alertEl.innerHTML = `
+        <div class="alert-banner warning">
+          <div class="alert-icon">⚠️</div>
+          <div>
+            <div class="alert-title">GP ต่ำกว่าเกณฑ์</div>
+            <div class="alert-detail">
+              Actual GP ${gp.toFixed(1)}% — ต่ำกว่า 25% threshold<br>
+              ควรทบทวนต้นทุนและ scope ของโปรเจคนี้
+            </div>
+          </div>
+          <div class="alert-badge">GP ${gp.toFixed(1)}%</div>
+        </div>`;
+    } else if (overPct > 15) {
+      // APPROACHING OVERRUN
+      alertEl.innerHTML = `
+        <div class="alert-banner warning">
+          <div class="alert-icon">⚡</div>
+          <div>
+            <div class="alert-title">ใกล้ถึง Budget — ระวัง!</div>
+            <div class="alert-detail">
+              ใช้ไปแล้ว ${bud?(act/bud*100).toFixed(1):'—'}% ของ Budget&nbsp;&nbsp;|&nbsp;&nbsp;Saving เหลือ ฿${fmt(sav)}<br>
+              ควรควบคุมต้นทุนที่เหลืออย่างเข้มงวด
+            </div>
+          </div>
+          <div class="alert-badge">เหลือ ฿${fmt(sav)}</div>
+        </div>`;
+    } else {
+      alertEl.innerHTML = '';
+    }
+  }
+
+  // Cost table tbody
+  const tbody = document.getElementById('cost-tbody-'+pid);
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr class="row-budget">
+        <td>Budget</td>
+        <td><span class="editable" onclick="startInlineEdit('${pid}','dm_budget',this)">${fmt(p.dm_budget)}</span></td>
+        <td><span class="editable" onclick="startInlineEdit('${pid}','dl_budget',this)">${fmt(p.dl_budget)}</span></td>
+        <td><span class="editable" onclick="startInlineEdit('${pid}','oh_budget',this)">${fmt(p.oh_budget)}</span></td>
+        <td><strong>${fmt(bud)}</strong></td>
+      </tr>
+      <tr class="row-actual">
+        <td>Actual</td>
+        <td><span class="editable" onclick="startInlineEdit('${pid}','dm_actual',this)">${fmt(p.dm_actual)}</span></td>
+        <td><span class="editable" onclick="startInlineEdit('${pid}','dl_actual',this)">${fmt(p.dl_actual)}</span></td>
+        <td><span class="editable" onclick="startInlineEdit('${pid}','oh_actual',this)">${p.oh_actual?fmt(p.oh_actual):'0'}</span></td>
+        <td><strong>${fmt(act)}</strong></td>
+      </tr>
+      <tr class="row-dif">
+        <td>Saving</td>
+        <td style="color:${dmSav>=0?'var(--green)':'var(--red)'}">${fmt(dmSav)}</td>
+        <td style="color:${dlSav>=0?'var(--green)':'var(--red)'}">${fmt(dlSav)}</td>
+        <td style="color:${ohSav>=0?'var(--green)':'var(--red)'}">${p.oh_budget?fmt(ohSav):'—'}</td>
+        <td style="color:${sav>=0?'var(--green)':'var(--red)'}"><strong>${fmt(sav)}</strong></td>
+      </tr>
+      <tr class="row-pct">
+        <td>Saving %</td>
+        <td style="color:${dmPct>=0?'var(--green)':'var(--red)'}">${p.dm_budget?dmPct.toFixed(2)+'%':'—'}</td>
+        <td style="color:${dlPct>=0?'var(--green)':'var(--red)'}">${p.dl_budget?dlPct.toFixed(2)+'%':'—'}</td>
+        <td>—</td>
+        <td style="color:${sav>=0?'var(--green)':'var(--red)'}"><strong>${bud?((sav/bud)*100).toFixed(2)+'%':'—'}</strong></td>
+      </tr>`;
+    tbody.classList.add('save-flash');
+    setTimeout(()=>tbody.classList.remove('save-flash'),500);
+  }
+
+  // Bar visual
+  const barBody = document.getElementById('bar-body-'+pid);
+  if (barBody) {
+    barBody.innerHTML =
+      barGroup('DM — Direct Material', p.dm_budget, p.dm_actual) +
+      barGroup('DL — Direct Labor', p.dl_budget, p.dl_actual) +
+      barGroup('OH — Overhead', p.oh_budget, p.oh_actual);
+  }
+
+  // Saving banner
+  const banner = document.getElementById('sav-banner-'+pid);
+  if (banner) {
+    const budGp = budgetGP(p);
+    const diff = gp - budGp;
+    const isOver = sav < 0;
+    const savColor = isOver ? 'var(--red)' : 'var(--green)';
+    const gpColor  = diff >= 0 ? 'var(--green)' : 'var(--gold)';
+    banner.style.borderLeftColor = isOver ? 'var(--red)' : 'var(--green)';
+    banner.style.background = isOver
+      ? 'linear-gradient(135deg,rgba(231,76,60,.1),rgba(231,76,60,.03))'
+      : 'linear-gradient(135deg,rgba(39,174,96,.12),rgba(39,174,96,.04))';
+    banner.innerHTML = `
+      <div>
+        <div class="sav-left-lbl">💰 Total Cost Saving</div>
+        <div class="sav-left-val" style="color:${savColor}">${isOver?'-':''}฿ ${fmt(Math.abs(sav))}</div>
+        <div class="sav-left-sub">${isOver ? '⚠ Cost overrun — เกิน budget' : `Under budget ${bud?(Math.abs(sav)/bud*100).toFixed(1)+'%':''}`}</div>
+      </div>
+      <div>
+        <div class="sav-right-lbl">Actual GP Est.</div>
+        <div class="sav-right-val" style="color:${gpColor}">${gp.toFixed(1)}%</div>
+        <div class="sav-right-sub" style="color:${gpColor}">${diff>=0?'+':''}${diff.toFixed(1)}% vs Budget GP ${budGp.toFixed(1)}%</div>
+      </div>`;
+  }
+
+  // KPI mini cards (contract, budget, gp)
+  const kpi1 = document.getElementById('kpi-contract-'+pid);
+  const kpi2 = document.getElementById('kpi-budget-'+pid);
+  const kpi3 = document.getElementById('kpi-gp-'+pid);
+  if (kpi1) kpi1.innerHTML = `<div class="kpi-label">Contract Value</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:white">${fmtM(p.contract)}</div>
+    <div style="font-size:11px;color:var(--muted)">฿ ${fmt(p.contract)}</div>`;
+  if (kpi2) kpi2.innerHTML = `<div class="kpi-label">Sales Budget</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:white">${fmtM(bud)}</div>
+    <div style="font-size:11px;color:var(--muted)">GP Budget: ${budgetGP(p).toFixed(1)}%</div>`;
+  if (kpi3) {
+    const diff = gp - budgetGP(p);
+    kpi3.innerHTML = `<div class="kpi-label">Actual GP%</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:${gp>=budgetGP(p)?'var(--green)':'var(--red)'}">${gp.toFixed(1)}%</div>
+      <div style="font-size:11px;color:${diff>=0?'var(--green)':'var(--red)'}">${diff>=0?'+':''}${diff.toFixed(1)}% vs Budget</div>`;
+  }
+}
+
+// ---- Inline edit cell ----
+function startInlineEdit(pid, field, el) {
+  const projects = getProjects();
+  const p = projects.find(x=>x.id===pid);
+  if (!p) return;
+  const cur = +p[field]||0;
+  const inp = document.createElement('input');
+  inp.className = 'inline-input';
+  inp.type = 'number';
+  inp.value = cur;
+  inp.min = 0;
+  el.replaceWith(inp);
+  inp.focus();
+  inp.select();
+
+  function commit() {
+    const val = Math.max(0, +inp.value||0);
+    const all = getProjects();
+    const idx = all.findIndex(x=>x.id===pid);
+    if (idx<0) return;
+    all[idx][field] = val;
+    save(all);
+    renderDetailReactive(pid);
+    renderSummaryKPIs();
+    renderProjectTable();
+  }
+  inp.addEventListener('keydown', e => {
+    if (e.key==='Enter') { e.preventDefault(); commit(); }
+    if (e.key==='Escape') { renderDetailReactive(pid); }
+  });
+  inp.addEventListener('blur', commit);
+}
+
+// ---- Progress slider ----
+function updateProgressLive(pid, val) {
+  const el = document.getElementById('prog-val-'+pid);
+  if (el) el.textContent = val+'%';
+  const ring = document.getElementById('ring-fill-'+pid);
+  const pct = document.getElementById('ring-pct-'+pid);
+  if (ring) {
+    const r=40, circ=2*Math.PI*r, offset=circ*(1-val/100);
+    ring.style.strokeDashoffset = offset.toFixed(1);
+  }
+  if (pct) pct.textContent = val+'%';
+}
+
+function saveProgressInline(pid, val) {
+  const all = getProjects();
+  const idx = all.findIndex(x=>x.id===pid);
+  if (idx<0) return;
+  all[idx].progress = +val;
+  save(all);
+  renderProjectTable();
+  showToast('Progress updated: '+val+'%', 'ok');
+}
+
+// ===================== PROJECT CARDS =====================
+function renderProjectCards() {
+  const projects = getProjects();
+  const container = document.getElementById('project-cards');
+  if (!projects.length) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">📁</div>
+      <p>ยังไม่มีโปรเจค</p>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Project</button>
+    </div>`;
+    return;
+  }
+  container.innerHTML = projects.map(p => {
+    const gp = gpPct(p), rec = payReceived(p);
+    const recPct = p.contract ? (rec/p.contract*100) : 0;
+    return `<div style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--orange);padding:20px;transition:.2s;cursor:pointer" onclick="showDetail('${p.id}')">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:6px">${p.code||'—'}</div>
+      <div style="font-size:15px;font-weight:700;color:white;margin-bottom:4px;line-height:1.3">${p.name}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${p.customer}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Contract</div>
+          <div style="font-family:'Space Mono',monospace;font-size:13px">${fmtM(p.contract)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Actual GP%</div>
+          <div style="font-family:'Space Mono',monospace;font-size:13px;color:${gp>=35?'var(--green)':gp>=25?'var(--gold)':'var(--red)'};font-weight:700">${gp.toFixed(1)}%</div>
+        </div>
+      </div>
+      <div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px">
+          <span>Progress</span><span>${p.progress||0}%</span>
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,.06)">
+          <div style="height:100%;background:var(--orange);width:${p.progress||0}%"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)">
+        <span>Payment: ${fmtM(rec)} / ${fmtM(p.contract)}</span>
+        <span style="color:var(--orange-l)">${recPct.toFixed(0)}%</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== ADD / EDIT MODAL =====================
+let payRowCount = 0;
+function openAddModal() {
+  document.getElementById('modal-title').innerHTML = 'Add <span>Project</span>';
+  document.getElementById('edit-id').value = '';
+  ['f-name','f-customer','f-enduser','f-code','f-contract','f-progress',
+   'f-dm-bud','f-dl-bud','f-oh-bud','f-dm-act','f-dl-act','f-oh-act'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  payRowCount = 0;
+  document.getElementById('payment-rows').innerHTML = '';
+  addPayRow('20% Down Payment','','Pending');
+  document.getElementById('add-modal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const p = getProjects().find(x=>x.id===id);
+  if (!p) return;
+  document.getElementById('modal-title').innerHTML = 'Edit <span>Project</span>';
+  document.getElementById('edit-id').value = p.id;
+  document.getElementById('f-name').value = p.name||'';
+  document.getElementById('f-customer').value = p.customer||'';
+  document.getElementById('f-enduser').value = p.end_user||'-';
+  document.getElementById('f-code').value = p.code||'';
+  document.getElementById('f-contract').value = p.contract||'';
+  document.getElementById('f-progress').value = p.progress||'';
+  document.getElementById('f-dm-bud').value = p.dm_budget||'';
+  document.getElementById('f-dl-bud').value = p.dl_budget||'';
+  document.getElementById('f-oh-bud').value = p.oh_budget||'';
+  document.getElementById('f-dm-act').value = p.dm_actual||'';
+  document.getElementById('f-dl-act').value = p.dl_actual||'';
+  document.getElementById('f-oh-act').value = p.oh_actual||'';
+  payRowCount = 0;
+  document.getElementById('payment-rows').innerHTML = '';
+  (p.payments||[]).forEach(pm => addPayRow(pm.term, pm.amount, pm.status));
+  document.getElementById('add-modal').classList.add('open');
+}
+
+function addPayRow(term='', amount='', status='Pending') {
+  const id = payRowCount++;
+  const div = document.createElement('div');
+  div.className = 'pay-row';
+  div.id = `pay-${id}`;
+  div.innerHTML = `
+    <div class="form-group">
+      <label>Term Description</label>
+      <input class="pay-term" placeholder="e.g. 30% After FAT" value="${term}">
+    </div>
+    <div class="form-group">
+      <label>Amount (฿)</label>
+      <input class="pay-amount" type="number" placeholder="1000000" value="${amount}">
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select class="pay-status">
+        <option ${status==='Pending'?'selected':''}>Pending</option>
+        <option ${status==='Paid'?'selected':''}>Paid</option>
+        <option ${status&&status!=='Pending'&&status!=='Paid'?'selected':''} value="${status&&status!=='Pending'&&status!=='Paid'?status:'INV issued'}">INV issued</option>
+      </select>
+    </div>
+    <button class="btn-icon" onclick="document.getElementById('pay-${id}').remove()">✕</button>`;
+  document.getElementById('payment-rows').appendChild(div);
+}
+
+function saveProject() {
+  const name = document.getElementById('f-name').value.trim();
+  const customer = document.getElementById('f-customer').value.trim();
+  const end_user = document.getElementById('f-enduser').value.trim() || '-';
+  if (!name || !customer) { showToast('กรุณากรอก Project Name และ Customer', 'error'); return; }
+
+  const payments = [];
+  document.querySelectorAll('.pay-row').forEach(row => {
+    const term = row.querySelector('.pay-term').value.trim();
+    const amount = +row.querySelector('.pay-amount').value||0;
+    const status = row.querySelector('.pay-status').value;
+    if (term) payments.push({term, amount, status});
+  });
+
+  const editId = document.getElementById('edit-id').value;
+  const projects = getProjects();
+
+  if (editId) {
+    const idx = projects.findIndex(x=>x.id===editId);
+    if (idx > -1) {
+      const old = projects[idx];
+      projects[idx] = {
+        ...old,
+        name, customer, end_user,
+        code: document.getElementById('f-code').value.trim(),
+        contract: +document.getElementById('f-contract').value||0,
+        progress: +document.getElementById('f-progress').value||0,
+        dm_budget: +document.getElementById('f-dm-bud').value||0,
+        dl_budget: +document.getElementById('f-dl-bud').value||0,
+        oh_budget: +document.getElementById('f-oh-bud').value||0,
+        dm_actual: +document.getElementById('f-dm-act').value||0,
+        dl_actual: +document.getElementById('f-dl-act').value||0,
+        oh_actual: +document.getElementById('f-oh-act').value||0,
+        payments
+      };
+    }
+    showToast('✓ Project updated', 'success');
+  } else {
+    projects.push({
+      id: uid(), name, customer, end_user,
+      code: document.getElementById('f-code').value.trim(),
+      contract: +document.getElementById('f-contract').value||0,
+      progress: +document.getElementById('f-progress').value||0,
+      dm_budget: +document.getElementById('f-dm-bud').value||0,
+      dl_budget: +document.getElementById('f-dl-bud').value||0,
+      oh_budget: +document.getElementById('f-oh-bud').value||0,
+      dm_actual: +document.getElementById('f-dm-act').value||0,
+      dl_actual: +document.getElementById('f-dl-act').value||0,
+      oh_actual: +document.getElementById('f-oh-act').value||0,
+      photo: null, photoCaption: '', payments
+    });
+    showToast('✓ Project added', 'success');
+  }
+  save(projects);
+  closeModal('add-modal');
+  renderSummary();
+  renderProjectCards();
+}
+
+function deleteProject(id) {
+  if (!confirm('ลบโปรเจคนี้?')) return;
+  save(getProjects().filter(x=>x.id!==id));
+  showToast('Project deleted', '');
+  renderSummary();
+  renderProjectCards();
+  showPage('summary');
+}
+
+// Auto-calculate totals in form
+['f-dm-bud','f-dl-bud','f-oh-bud'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input', ()=>{
+    const t = (+document.getElementById('f-dm-bud').value||0)+
+              (+document.getElementById('f-dl-bud').value||0)+
+              (+document.getElementById('f-oh-bud').value||0);
+    document.getElementById('bud-total').textContent = fmt(t);
+  });
+});
+['f-dm-act','f-dl-act','f-oh-act'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input', ()=>{
+    const t = (+document.getElementById('f-dm-act').value||0)+
+              (+document.getElementById('f-dl-act').value||0)+
+              (+document.getElementById('f-oh-act').value||0);
+    document.getElementById('act-total').textContent = fmt(t);
+  });
+});
+
+// ===================== PHOTO =====================
+function triggerDetailPhoto(id) {
+  const inp = document.getElementById('detail-photo-input');
+  inp.onchange = (e) => saveDetailPhoto(id, e);
+  inp.click();
+}
+function saveDetailPhoto(id, event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const projects = getProjects();
+    const p = projects.find(x=>x.id===id);
+    if (p) { p.photo = e.target.result; save(projects); showDetail(id); }
+  };
+  reader.readAsDataURL(file);
+}
+function removeDetailPhoto(id) {
+  const projects = getProjects();
+  const p = projects.find(x=>x.id===id);
+  if (p) { p.photo = null; save(projects); showDetail(id); }
+}
+
+// ===================== CSV IMPORT =====================
+function openImportModal() { document.getElementById('import-modal').classList.add('open'); }
+
+function handleCsvDrop(e) {
+  e.preventDefault();
+  document.getElementById('csv-drop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) processCSV(file);
+}
+function handleCsvFile(e) { if (e.target.files[0]) processCSV(e.target.files[0]); }
+
+function processCSV(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.trim().split('\n');
+    const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
+    const projects = getProjects();
+    let added = 0;
+    for (let i=1; i<lines.length; i++) {
+      const cols = lines[i].split(',').map(c=>c.trim());
+      if (cols.length < 3) continue;
+      const row = {};
+      headers.forEach((h,j) => row[h] = cols[j]||'');
+      if (!row.name) continue;
+      projects.push({
+        id: uid(),
+        name: row.name||'', customer: row.customer||'', code: row.code||'',
+        contract: +row.contract||0, progress: +row.progress||0,
+        dm_budget: +row.dm_budget||0, dl_budget: +row.dl_budget||0, oh_budget: +row.oh_budget||0,
+        dm_actual: +row.dm_actual||0, dl_actual: +row.dl_actual||0, oh_actual: +row.oh_actual||0,
+        photo: null, photoCaption: '', payments: []
+      });
+      added++;
+    }
+    save(projects);
+    closeModal('import-modal');
+    renderSummary();
+    renderProjectCards();
+    showToast(`✓ Imported ${added} projects`, 'success');
+  };
+  reader.readAsText(file);
+}
+
+// ===================== AI ANALYSIS =====================
+function runAIAnalysis() {
+  const projects = getProjects();
+  if (!projects.length) { showToast('ยังไม่มีข้อมูลโปรเจค', 'error'); return; }
+
+  const panel = document.getElementById('ai-panel');
+  const content = document.getElementById('ai-content');
+  panel.style.display = 'block';
+
+  const summary = projects.map(p => {
+    const bud = budgetTotal(p), act = actualTotal(p);
+    return `• ${p.code} | ${p.customer}${p.end_user && p.end_user!=='-' ? ' → '+p.end_user : ''} | ${p.name}
+  Contract: ฿${(+p.contract/1e6).toFixed(2)}M | Budget: ฿${(bud/1e6).toFixed(2)}M | Actual: ฿${(act/1e6).toFixed(2)}M
+  Saving: ฿${(saving(p)/1e6).toFixed(2)}M | GP: ${gpPct(p).toFixed(1)}% | Progress: ${p.progress}% | Status: ${p.status}
+  Payment รับแล้ว: ฿${(payReceived(p)/1e6).toFixed(2)}M | คงค้าง: ฿${((+p.contract - payReceived(p))/1e6).toFixed(2)}M`;
+  }).join('\n\n');
+
+  const prompt = `คุณเป็น Project Cost Controller ผู้เชี่ยวชาญ วิเคราะห์ข้อมูล Portfolio โปรเจคด้านล่าง และให้ insights ภาษาไทยที่ชัดเจน กระชับ เน้น action items
+
+ข้อมูล Portfolio:
+${summary}
+
+วิเคราะห์ใน 4 หัวข้อ:
+1) 🔴 โปรเจคที่น่าเป็นห่วง (cost overrun / progress ช้า)
+2) 🟢 โปรเจคที่ทำได้ดี
+3) 💰 Payment ที่ต้องติดตามด่วน
+4) 📋 ข้อแนะนำเพื่อปรับปรุง`;
+
+  content.className = 'ai-content';
+  content.innerHTML = `
+    <div style="margin-bottom:14px;color:var(--muted);font-size:13px;line-height:1.6">
+      เนื่องจากข้อจำกัด CORS ของ browser ไม่สามารถเรียก AI โดยตรงได้<br>
+      กรุณา <strong style="color:white">Copy Prompt</strong> ด้านล่าง แล้วนำไปวางใน
+      <a href="https://claude.ai" target="_blank" style="color:var(--orange)">claude.ai</a> เพื่อรับการวิเคราะห์ครับ
+    </div>
+    <textarea id="ai-prompt-box" readonly style="width:100%;height:200px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'Space Mono',monospace;padding:12px;resize:vertical;line-height:1.5">${prompt}</textarea>
+    <button class="btn btn-sm" onclick="copyAIPrompt()" style="margin-top:10px;background:var(--orange);color:white;border:none">
+      📋 Copy Prompt
+    </button>
+    <span id="ai-copy-ok" style="margin-left:10px;color:var(--green);font-size:13px;display:none">✓ Copied!</span>`;
+}
+
+function copyAIPrompt() {
+  const box = document.getElementById('ai-prompt-box');
+  navigator.clipboard.writeText(box.value).then(() => {
+    const ok = document.getElementById('ai-copy-ok');
+    ok.style.display = 'inline';
+    setTimeout(() => ok.style.display = 'none', 2500);
+  });
+}
+
+// ===================== UTILS =====================
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modals on background click
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if(e.target===bg) bg.classList.remove('open'); });
+});
+
+// ===================== INIT =====================
+function resetToDemo() {
+  if (!confirm('รีเซ็ตข้อมูลกลับเป็นข้อมูลจาก PowerPoint ทั้ง 12 โปรเจค?')) return;
+  localStorage.removeItem(STORE_KEY);
+  seedDemo();
+  renderSummary();
+  renderProjectCards();
+  showPage('summary');
+  showToast('✓ โหลดข้อมูล 12 โปรเจคจาก PowerPoint แล้ว', 'success');
+}
+seedDemo();
+renderSummary();
+</script>
+</body>
+</html>
