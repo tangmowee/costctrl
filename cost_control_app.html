@@ -569,7 +569,7 @@ Next Project Name,Customer Name,CODE-001,5000000,60,2000000,150000,300000,180000
 
 <script>
 // ===================== DATA STORE =====================
-const STORE_KEY = 'costctrl_projects_v25';
+const STORE_KEY = 'costctrl_projects_v28';
 
 // Clear stale old keys
 ['costctrl_projects','costctrl_projects_v1','costctrl_projects_v2','costctrl_projects_v3','costctrl_projects_v4','costctrl_projects_v5','costctrl_projects_v6','costctrl_projects_v7'].forEach(k=>localStorage.removeItem(k));
@@ -716,14 +716,14 @@ function seedDemo() {
     {
       id: 'p10', name: 'Machine Tending',
       customer: 'YAMAZEN', end_user: 'SUMITOMO', code: 'JR-25-10-111',
-      contract: 720000, progress: 50,
+      contract: 1229300, progress: 50,
       dm_budget: 755637, dl_budget: 98400, oh_budget: 42305,
       dm_actual: 561884, dl_actual: 368269, oh_actual: 3050,
       status: 'MONITOR', photo: null, photoCaption: '',
       payments: [
-        {term:'Down payment 40%', amount:288000, status:'Paid'},
-        {term:'Before Delivery credit 30 days 50%', amount:360000, status:'INV Issued'},
-        {term:'After Inspection credit 30 days 10%', amount:72000, status:'Pending'},
+        {term:'Down payment 40%', amount:526140, status:'Paid'},
+        {term:'Before Delivery credit 30 days', amount:631160, status:'INV Issued'},
+        {term:'After Inspection credit 30 days', amount:72000, status:'Pending'},
       ]
     },
     {
