@@ -569,7 +569,7 @@ Next Project Name,Customer Name,CODE-001,5000000,60,2000000,150000,300000,180000
 
 <script>
 // ===================== DATA STORE =====================
-const STORE_KEY = 'costctrl_projects_v23';
+const STORE_KEY = 'costctrl_projects_v25';
 
 // Clear stale old keys
 ['costctrl_projects','costctrl_projects_v1','costctrl_projects_v2','costctrl_projects_v3','costctrl_projects_v4','costctrl_projects_v5','costctrl_projects_v6','costctrl_projects_v7'].forEach(k=>localStorage.removeItem(k));
@@ -589,46 +589,46 @@ function seedDemo() {
     {
       id: 'p1', name: 'Plasma Arc Welding with 3D Vision System',
       customer: 'CHROMALLOY', end_user: '-', code: 'JR-25-07-075',
-      contract: 10510000, progress: 85,
+      contract: 11245700, progress: 85,
       dm_budget: 5874794, dl_budget: 450000, oh_budget: 710200,
       dm_actual: 5292974, dl_actual: 519912, oh_actual: 114246,
       status: 'ON TRACK', photo: null, photoCaption: '',
       payments: [
-        {term:'Down Payment credit 30 days', amount:2102000, status:'Paid'},
-        {term:'After test report credit 30 days', amount:3678500, status:'Paid'},
-        {term:'After FAT credit 30 days', amount:2627500, status:'Paid'},
-        {term:'After Final delivery credit 30 days', amount:1051000, status:'Paid'},
-        {term:'After commissioning credit 30 days', amount:1051000, status:'INV Issued'}
+        {term:'Down Payment credit 30 days', amount:2249140, status:'Paid'},
+        {term:'After test report credit 30 days', amount:3935995, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:2811425, status:'Paid'},
+        {term:'After Final delivery credit 30 days', amount:1124570, status:'Paid'},
+        {term:'After commissioning credit 30 days', amount:1124570, status:'INV Issued'}
       ]
     },
     {
       id: 'p2', name: 'Pick & Place System (หน้าเตา)',
       customer: 'THAI EASTERN INNOVATION', end_user: '-', code: 'JR-24-04-020',
-      contract: 12630000, progress: 75,
+      contract: 13514100, progress: 75,
       dm_budget: 7484000, dl_budget: 757140, oh_budget: 265000,
       dm_actual: 6737144, dl_actual: 605860, oh_actual: 0,
       status: 'ON TRACK', photo: null, photoCaption: '',
       payments: [
-        {term:'Down Payment', amount:5052000, status:'Paid'},
-        {term:'After Approve DWG credit 30 days', amount:2526000, status:'Paid'},
-        {term:'After FAT credit 30 days', amount:1894500, status:'Paid'},
-        {term:'After Material on site credit 30 days', amount:1263000, status:'Pending'},
-        {term:'After Handover credit 30 days', amount:1894500, status:'Pending'}
+        {term:'Down Payment', amount:5405640, status:'Paid'},
+        {term:'After Approve DWG credit 30 days', amount:2702820, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:2027115, status:'Paid'},
+        {term:'After Material on site credit 30 days', amount:1351410, status:'Pending'},
+        {term:'After Handover credit 30 days', amount:2027115, status:'Pending'}
       ]
     },
     {
       id: 'p3', name: 'Palletizing Full System (ลงลัง)',
       customer: 'EQ RUBBER', end_user: '-', code: 'JR-24-04-019',
-      contract: 12630000, progress: 80,
+      contract: 13514100, progress: 80,
       dm_budget: 9600000, dl_budget: 903933, oh_budget: 326800,
       dm_actual: 8722636, dl_actual: 516293, oh_actual: 0,
       status: 'MONITOR', photo: null, photoCaption: '',
       payments: [
-        {term:'Down Payment', amount:5052000, status:'Paid'},
-        {term:'After Approve DWG credit 30 days', amount:2526000, status:'Paid'},
-        {term:'After FAT credit 30 days', amount:1894500, status:'Paid'},
-        {term:'After Material on site credit 30 days', amount:1263000, status:'INV issued'},
-        {term:'After Handover credit 30 days', amount:1894500, status:'Pending'}
+        {term:'Down Payment', amount:5405640, status:'Paid'},
+        {term:'After Approve DWG credit 30 days', amount:2702820, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:2027115, status:'Paid'},
+        {term:'After Material on site credit 30 days', amount:1351410, status:'INV issued'},
+        {term:'After Handover credit 30 days', amount:2027115, status:'Pending'}
       ]
     },
     {
@@ -649,106 +649,106 @@ function seedDemo() {
     {
       id: 'p5', name: 'Machine Tending System',
       customer: 'YAMAZEN', end_user: 'FCC', code: 'JR-25-10-108',
-      contract: 10155000, progress: 40,
+      contract: 10865850, progress: 40,
       dm_budget: 4871370, dl_budget: 655100, oh_budget: 563198,
       dm_actual: 4107272, dl_actual: 374320, oh_actual: 0,
       status: 'MONITOR', photo: null, photoCaption: '',
       payments: [
-        {term:'Down payment', amount:4062000, status:'Paid'},
-        {term:'Before delivery credit 30 days', amount:4062000, status:'Pending'},
-        {term:'After Inspection credit 30 days', amount:2031000, status:'Pending'}
+        {term:'Down payment 40%', amount:4346340, status:'Paid'},
+        {term:'Before delivery credit 30 days 40%', amount:4346340, status:'Pending'},
+        {term:'After Inspection credit 30 days 20%', amount:2173170, status:'Pending'},
       ]
     },
     {
       id: 'p6', name: 'Robot Pallet System & Auto Packing Line',
       customer: 'TC UNION', end_user: '-', code: 'JR-25-12-140',
-      contract: 9000000, progress: 30,
+      contract: 9630000, progress: 30,
       dm_budget: 6944000, dl_budget: 100000, oh_budget: 40000,
       dm_actual: 5620396, dl_actual: 32974, oh_actual: 0,
       status: 'MONITOR', photo: null, photoCaption: '',
       payments: [
-        {term:'Down payment', amount:3600000, status:'Paid'},
-        {term:'After delivery & Layout credit 7 days', amount:4500000, status:'Pending'},
-        {term:'After handover credit 30 days', amount:900000, status:'Pending'}
+        {term:'Down payment', amount:3852000, status:'Paid'},
+        {term:'After delivery & Layout credit 7 days', amount:4815000, status:'Pending'},
+        {term:'After handover credit 30 days', amount:963000, status:'Pending'}
       ]
     },
     {
       id: 'p7', name: 'Palletizing (ลงลัง)',
       customer: 'THAI EASTERN INNOVATION', end_user: '-', code: 'JR-24-04-021',
-      contract: 8190000, progress: 70,
+      contract: 8763300, progress: 70,
       dm_budget: 6185667, dl_budget: 602622, oh_budget: 239800,
       dm_actual: 4959600, dl_actual: 690336, oh_actual: 0,
       status: 'COST OVERRUN', photo: null, photoCaption: '',
       payments: [
-        {term:'Down Payment', amount:3276000, status:'Paid'},
-        {term:'After Approve DWG credit 30 days', amount:1638000, status:'Paid'},
-        {term:'After FAT credit 30 days', amount:1228500, status:'Paid'},
-        {term:'After Material on site credit 30 days', amount:819000, status:'Pending'},
-        {term:'After Handover credit 30 days', amount:1228500, status:'Pending'}
+        {term:'Down Payment', amount:3505320, status:'Paid'},
+        {term:'After Approve DWG credit 30 days', amount:1752660, status:'Paid'},
+        {term:'After FAT credit 30 days', amount:1314495, status:'Paid'},
+        {term:'After Material on site credit 30 days', amount:876330, status:'Pending'},
+        {term:'After Handover credit 30 days', amount:1314495, status:'Pending'}
       ]
     },
     {
       id: 'p8', name: 'Vision Inspection Machine',
       customer: 'YAMAZEN', end_user: 'RICOH', code: 'JR-25-12-137',
-      contract: 2090000, progress: 70,
+      contract: 2236300, progress: 70,
       dm_budget: 1119300, dl_budget: 150000, oh_budget: 109550,
       dm_actual: 907503, dl_actual: 166183, oh_actual: 0,
       status: 'MONITOR', photo: null, photoCaption: '',
       payments: [
-        {term:'Down payment', amount:836000, status:'Paid'},
-        {term:'Before delivery credit 30 days', amount:1045000, status:'INV Issued'},
-        {term:'After handover credit 30 days', amount:209000, status:'INV Issued'}
+        {term:'Down payment 40%', amount:894520, status:'Paid'},
+        {term:'Before delivery credit 30 days 50%', amount:1118150, status:'INV Issued'},
+        {term:'After handover credit 30 days 10%', amount:223630, status:'INV Issued'},
       ]
     },
     {
       id: 'p9', name: 'Robot Offset – Plastic Part Deviation',
       customer: 'UD TRUCKS', end_user: '-', code: 'JR-25-08-094',
-      contract: 1630500, progress: 90,
+      contract: 1744635, progress: 90,
       dm_budget: 732150, dl_budget: 250018, oh_budget: 41993,
       dm_actual: 523436, dl_actual: 323751, oh_actual: 0,
       status: 'ON TRACK', photo: null, photoCaption: '',
       payments: [
-        {term:'After PO 7 days', amount:815250, status:'Paid'},
-        {term:'After Delivery credit 30 days', amount:489150, status:'Paid'},
-        {term:'After Installation 30 days', amount:326100, status:'Paid'}
+        {term:'After PO 7 days', amount:872318, status:'Paid'},
+        {term:'After Delivery credit 30 days', amount:523390, status:'Paid'},
+        {term:'After Installation 30 days', amount:348927, status:'Paid'}
       ]
     },
     {
       id: 'p10', name: 'Machine Tending',
       customer: 'YAMAZEN', end_user: 'SUMITOMO', code: 'JR-25-10-111',
-      contract: 1229300, progress: 50,
+      contract: 720000, progress: 50,
       dm_budget: 755637, dl_budget: 98400, oh_budget: 42305,
       dm_actual: 561884, dl_actual: 368269, oh_actual: 3050,
       status: 'MONITOR', photo: null, photoCaption: '',
       payments: [
-        {term:'Down payment 40%', amount:491720, status:'Paid'},
-        {term:'Before Delivery credit 30 days 40%', amount:491721, status:'INV Issued'},
-        {term:'After Inspection credit 30 days 20%', amount:245860, status:'Pending'},
+        {term:'Down payment 40%', amount:288000, status:'Paid'},
+        {term:'Before Delivery credit 30 days 50%', amount:360000, status:'INV Issued'},
+        {term:'After Inspection credit 30 days 10%', amount:72000, status:'Pending'},
       ]
     },
     {
       id: 'p11', name: 'Modify HWAL2.0 to NPI Line Phase 1',
       customer: 'DONALDSON', end_user: '-', code: 'JR-26-02-015/016',
-      contract: 622000, progress: 13,
+      contract: 292000, progress: 13,
       dm_budget: 148000, dl_budget: 155000, oh_budget: 20000,
       dm_actual: 54834, dl_actual: 247266, oh_actual: 0,
       status: 'MONITOR', photo: null, photoCaption: '',
       payments: [
-        {term:'After PO', amount:311000, status:'Paid'},
-        {term:'After delivery credit 30 days', amount:248800, status:'Pending'},
-        {term:'After handover credit 30 days', amount:62200, status:'Pending'},
+        {term:'After PO', amount:146000, status:'Paid'},
+        {term:'After delivery credit 30 days', amount:116800, status:'Pending'},
+        {term:'After handover credit 30 days', amount:29200, status:'Pending'}
       ]
     },
     {
       id: 'p12', name: 'Safety Door & Safety Dicing Machine',
       customer: 'YAMAZEN', end_user: 'RICOH', code: 'JR-25-10-114',
-      contract: 310000, progress: 100,
+      contract: 331700, progress: 100,
       dm_budget: 88890, dl_budget: 65400, oh_budget: 25400,
       dm_actual: 57035, dl_actual: 52078, oh_actual: 14321,
       status: 'COMPLETED', photo: null, photoCaption: '',
       payments: [
-        {term:'Down payment', amount:186000, status:'Paid'},
-        {term:'Before delivery credit 30 days', amount:124000, status:'Paid'}
+        {term:'Down payment 60%', amount:199020, status:'Paid'},
+        {term:'Before delivery credit 30 days 40%', amount:132680, status:'Paid'},
       ]
     },
   ];
